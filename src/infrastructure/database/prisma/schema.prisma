@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -185,4 +185,19 @@ model PlatformSettingTable {
   description   String?
   updated_by    String?
   updated_at    DateTime @default(now())
+}
+
+// Référentiel d'aliments (valeurs nutritionnelles indicatives), utilisé par
+// le solveur de ration (relais module-python) et son historisation.
+model FoodItemTable {
+  id              String   @id @default(uuid())
+  public_id       String   @unique
+  name            String   @unique
+  category        String
+  dry_matter_pct  Float?
+  energy_ufl      Float?
+  protein_pct     Float?
+  calcium_pct     Float?
+  phosphorus_pct  Float?
+  created_at      DateTime @default(now())
 }

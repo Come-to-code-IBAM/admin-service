@@ -8,6 +8,7 @@ export enum PublicIdPrefix {
   ZONE = 'zon',
   ALERT = 'alt',
   CAMPAIGN = 'cmp',
+  FOOD_ITEM = 'ali',
 }
 
 /**
