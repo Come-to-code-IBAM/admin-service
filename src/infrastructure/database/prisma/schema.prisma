@@ -1,0 +1,188 @@
+// Schéma Prisma — Carnet du troupeau (service admin)
+// Reflète la base serveur : opérateurs, éleveurs, agriculteurs, animaux,
+// vols, zones, alertes, campagnes, audit, paramètres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model UserTable {
+  id                String   @id @default(uuid())
+  public_id         String   @unique
+  email             String   @unique
+  password_hash     String
+  name              String
+  phone_number      String?
+  role              String   @default("agent")
+  organization      String?
+  habilitation_code String?
+  created_at        DateTime @default(now())
+
+  enrolled_animals  AnimalTable[]      @relation("AnimalEnrolledBy")
+  registered_elevs  EleveurTable[]
+  registered_agris  AgriculteurTable[]
+  campaigns         CampaignTable[]
+  audit_logs        AuditLogTable[]
+}
+
+model EleveurTable {
+  id            String   @id @default(uuid())
+  public_id     String   @unique
+  phone_number  String   @unique
+  name          String
+  village       String?
+  is_herder     Boolean  @default(true)
+  registered_by String?
+  registrar     UserTable? @relation(fields: [registered_by], references: [public_id])
+  created_at    DateTime @default(now())
+
+  animals       AnimalTable[]
+  @@index([village])
+}
+
+model AgriculteurTable {
+  id            String   @id @default(uuid())
+  public_id     String   @unique
+  phone_number  String   @unique
+  name          String
+  village       String?
+  registered_by String?
+  registrar     UserTable? @relation(fields: [registered_by], references: [public_id])
+  created_at    DateTime @default(now())
+
+  zones         CultivatedZoneTable[]
+  @@index([village])
+}
+
+model AnimalTable {
+  id               String   @id @default(uuid())
+  public_id        String   @unique
+  owner_id         String
+  owner            EleveurTable @relation(fields: [owner_id], references: [public_id])
+  signature_id     String?  @unique
+  species          String   @default("bovin")
+  breed            String?
+  age_estimate     Int?
+  distinctive_sign String?
+  tag_code         String?
+  status           String   @default("active")
+  village          String?
+  enrolled_by      String?
+  enroller         UserTable? @relation("AnimalEnrolledBy", fields: [enrolled_by], references: [public_id])
+  created_at       DateTime @default(now())
+
+  theft_reports    TheftReportTable[]
+  @@index([owner_id])
+  @@index([status])
+}
+
+model TheftReportTable {
+  id                  String   @id @default(uuid())
+  public_id           String   @unique
+  animal_id           String
+  animal              AnimalTable @relation(fields: [animal_id], references: [public_id])
+  reported_by_eleveur String?
+  reported_by_agent   String?
+  location            String?
+  circumstances       String?
+  status              String   @default("open")
+  report_date         DateTime
+  created_at          DateTime @default(now())
+
+  @@index([animal_id])
+  @@index([status])
+}
+
+model CultivatedZoneTable {
+  id             String   @id @default(uuid())
+  public_id      String   @unique
+  owner_id       String?
+  owner          AgriculteurTable? @relation(fields: [owner_id], references: [public_id])
+  polygon        String   // GeoJSON sérialisé
+  crop_type      String?
+  harvest_period String?
+  declared_by    String
+  created_at     DateTime @default(now())
+}
+
+model AlertTable {
+  id              String   @id @default(uuid())
+  public_id       String   @unique
+  type            String
+  related_id      String?
+  location        String?
+  recipients      String?
+  plan            String?
+  delivery_method String   @default("sms")
+  origin          String   @default("device")
+  status          String   @default("pending")
+  sent_at         DateTime?
+  created_at      DateTime @default(now())
+
+  @@index([type, status])
+}
+
+model CampaignTable {
+  id              String   @id @default(uuid())
+  public_id       String   @unique
+  title           String
+  content         String
+  channel         String   @default("sms")
+  target_village  String?
+  target_audience String   @default("all")
+  status          String   @default("draft")
+  start_date      DateTime
+  end_date        DateTime?
+  created_by      String
+  creator         UserTable @relation(fields: [created_by], references: [public_id])
+  created_at      DateTime @default(now())
+
+  deliveries      AwarenessDeliveryTable[]
+  @@index([status])
+}
+
+model AwarenessDeliveryTable {
+  id                    String   @id @default(uuid())
+  public_id             String   @unique
+  campaign_id           String
+  campaign              CampaignTable @relation(fields: [campaign_id], references: [public_id])
+  recipient_eleveur     String?
+  recipient_agriculteur String?
+  channel               String   @default("sms")
+  status                String   @default("pending")
+  sent_at               DateTime?
+  created_at            DateTime @default(now())
+
+  @@index([campaign_id])
+}
+
+model AuditLogTable {
+  audit_id   Int      @id @default(autoincrement())
+  public_id  String   @unique
+  actor_id   String?
+  actor      UserTable? @relation(fields: [actor_id], references: [public_id])
+  event_type String
+  entity     String
+  entity_id  String?
+  result     String?
+  details    String?
+  created_at DateTime @default(now())
+
+  @@index([event_type])
+  @@index([entity, entity_id])
+}
+
+model PlatformSettingTable {
+  id            String   @id @default(uuid())
+  public_id     String   @unique
+  setting_key   String   @unique
+  setting_value String
+  description   String?
+  updated_by    String?
+  updated_at    DateTime @default(now())
+}
