@@ -17,6 +17,19 @@ export interface CampaignProps {
 
 /** Campagne de sensibilisation. */
 export class CampaignEntity {
+  readonly id?: string;
+  readonly publicId!: string;
+  readonly title!: string;
+  readonly content!: string;
+  readonly channel!: CampaignChannelEnum;
+  readonly targetVillage?: string;
+  readonly targetAudience!: CampaignAudienceEnum;
+  readonly status!: CampaignStatusEnum;
+  readonly startDate!: Date;
+  readonly endDate?: Date;
+  readonly createdBy!: string;
+  readonly createdAt?: Date;
+
   constructor(props: CampaignProps) {
     Object.assign(this, props);
   }

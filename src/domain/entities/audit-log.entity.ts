@@ -14,6 +14,16 @@ export interface AuditLogProps {
 
 /** Entrée du journal d'audit (gouvernance, traçabilité). */
 export class AuditLogEntity {
+  readonly auditId?: number;
+  readonly publicId!: string;
+  readonly actorId?: string;
+  readonly eventType!: AuditEventTypeEnum;
+  readonly entity!: string;
+  readonly entityId?: string;
+  readonly result?: AuditResultEnum;
+  readonly details?: string;
+  readonly createdAt?: Date;
+
   constructor(props: AuditLogProps) {
     Object.assign(this, props);
   }
