@@ -9,6 +9,7 @@ export enum PublicIdPrefix {
   ALERT = 'alt',
   CAMPAIGN = 'cmp',
   FOOD_ITEM = 'ali',
+  AUDIT = 'aud',
 }
 
 /**

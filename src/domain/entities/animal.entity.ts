@@ -37,6 +37,6 @@ export class AnimalEntity {
 
   /** Un animal signalé volé ne peut plus être revendu légitimement. */
   isStolen(): boolean {
-    throw new Error('Not implemented');
+    return this.status === AnimalStatusEnum.STOLEN;
   }
 }

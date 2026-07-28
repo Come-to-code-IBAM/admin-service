@@ -11,6 +11,10 @@ export class VerifyAnimalUseCase {
   constructor(private readonly animalRepo: AnimalRepositoryPort) {}
 
   async execute(signatureId: string): Promise<VerifyAnimalResult> {
-    throw new Error('Not implemented');
+    const animal = await this.animalRepo.findBySignatureId(signatureId);
+    if (!animal) {
+      return { status: 'unknown', animal: null };
+    }
+    return { status: animal.isStolen() ? 'stolen' : 'recognized', animal };
   }
 }

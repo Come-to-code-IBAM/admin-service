@@ -1,7 +1,15 @@
 import { AlertEntity } from '../../../domain/entities/alert.entity';
 import { AlertRepositoryPort } from '../../../domain/port/out/alert.repository.port';
-import { PublicIdGeneratorPort } from '../../../domain/port/in/generate-public-id/generator-public-id.port';
-import { AlertPlanEnum } from '../../../domain/enums/alert.enum';
+import {
+  PublicIdGeneratorPort,
+  PublicIdPrefix,
+} from '../../../domain/port/in/generate-public-id/generator-public-id.port';
+import {
+  AlertPlanEnum,
+  AlertTypeEnum,
+  AlertStatusEnum,
+  AlertDeliveryEnum,
+} from '../../../domain/enums/alert.enum';
 
 export interface NotifyConflictCommand {
   zoneId: string;
@@ -21,6 +29,23 @@ export class NotifyConflictUseCase {
   ) {}
 
   async execute(command: NotifyConflictCommand): Promise<AlertEntity> {
-    throw new Error('Not implemented');
+    // Pas encore de AgriculteurRepositoryPort/lookup par zone dans ce scaffold :
+    // on trace l'alerte avec les données remontées par l'appareil, sans résoudre
+    // ni notifier de destinataire réel pour l'instant.
+    const deliveryMethod =
+      command.plan === AlertPlanEnum.B ? AlertDeliveryEnum.INTERNET : AlertDeliveryEnum.SMS;
+
+    const alert = new AlertEntity({
+      publicId: this.publicId.generate(PublicIdPrefix.ALERT),
+      type: AlertTypeEnum.CONFLICT,
+      relatedId: command.zoneId,
+      location: command.location,
+      plan: command.plan,
+      deliveryMethod,
+      status: AlertStatusEnum.OPEN,
+      sentAt: command.timestamp,
+    });
+
+    return this.alertRepo.saveAlert(alert);
   }
 }

@@ -6,6 +6,6 @@ export class ListAnimalsUseCase {
   constructor(private readonly animalRepo: AnimalRepositoryPort) {}
 
   async execute(ownerId?: string): Promise<AnimalEntity[]> {
-    throw new Error('Not implemented');
+    return ownerId ? this.animalRepo.findByOwner(ownerId) : this.animalRepo.findAll();
   }
 }

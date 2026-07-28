@@ -7,6 +7,14 @@ export class EleveurControllerAdapter {
 
   @Get()
   async findAll() {
-    throw new Error('Not implemented');
+    const eleveurs = await this.list.execute();
+    return eleveurs.map((eleveur) => ({
+      publicId: eleveur.publicId,
+      name: eleveur.name,
+      phoneNumber: eleveur.phoneNumber,
+      village: eleveur.village ?? null,
+      isHerder: eleveur.isHerder,
+      createdAt: eleveur.createdAt ?? null,
+    }));
   }
 }

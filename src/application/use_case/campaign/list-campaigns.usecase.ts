@@ -4,6 +4,6 @@ import { CampaignRepositoryPort } from '../../../domain/port/out/campaign.reposi
 export class ListCampaignsUseCase {
   constructor(private readonly campaignRepo: CampaignRepositoryPort) {}
   async execute(): Promise<CampaignEntity[]> {
-    throw new Error('Not implemented');
+    return this.campaignRepo.findAll();
   }
 }

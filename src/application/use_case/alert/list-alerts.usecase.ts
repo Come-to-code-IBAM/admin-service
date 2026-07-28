@@ -6,6 +6,6 @@ export class ListAlertsUseCase {
   constructor(private readonly alertRepo: AlertRepositoryPort) {}
 
   async execute(): Promise<AlertEntity[]> {
-    throw new Error('Not implemented');
+    return this.alertRepo.listAlerts();
   }
 }
